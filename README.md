@@ -1,4 +1,4 @@
 # Movie-Recommender-System
 DMBI Project
 
-Movie Recommnendation using Collaborative filtering technique.
+Movie Recommendation using Collaborative filtering technique.
