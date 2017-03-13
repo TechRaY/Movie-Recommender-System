@@ -97,9 +97,154 @@ def normalize_ratings(ratings, did_rate):
 
 
 
-# In[ ]:
 
-ratings,ratings_mean=normalize_ratings(ratings,didrate)
+# In[14]:
+
+ratings,ratings_mean_eachmovie=normalize_ratings(ratings,didrate)
+
+
+# In[15]:
+
+print ratings                        #full normalize ratings for each movie
+
+
+# In[16]:
+
+print ratings_mean_eachmovie
+
+
+# In[17]:
+
+num_users=ratings.shape[1]
+num_features=3     #no of features on which recommendation will be based for eg(romance,comedy,action)
+print num_features
+
+
+# In[18]:
+
+movie_features=random.randn(num_movies,num_features)
+user_prefs=random.randn(num_users,num_features)
+initial_X_and_Theta=r_[movie_features.T.flatten(),user_prefs.T.flatten()]
+
+
+# In[19]:
+
+print movie_features
+
+
+# In[20]:
+
+print user_prefs
+
+
+# In[21]:
+
+initial_X_and_Theta.shape
+
+
+# In[22]:
+
+def unroll_params(x_and_theta,num_users,num_movies,num_features):
+    
+    #finding the x and theta values separately
+
+    #get the first (30) values out of 48   
+    first_30=x_and_theta[:num_movies * num_features]
+  
+    #convert the 3*10 matrix into 10*3 matrix  
+    x=first_30.reshape((num_features,num_movies)).transpose()
+    
+    #get the rest (18) values out of 48    
+    last_18=x_and_theta[num_movies * num_features :]
+
+    #convert the 3*6 matrix into 6*3 matrix  
+    theta=last_18.reshape(num_features,num_users).transpose()
+
+    return x,theta       #return the values (x and theta are as such the x and y parameter of the regression equation)    
+
+
+# In[36]:
+
+def unroll_params(X_and_theta, num_users, num_movies, num_features):
+	# Retrieve the X and theta matrixes from X_and_theta, based on their dimensions (num_features, num_movies, num_movies)
+	
+	# Get the first 30 (10 * 3) rows in the 48 X 1 column vector
+	first_30 = X_and_theta[:num_movies * num_features]
+	# Reshape this column vector into a 10 X 3 matrix
+	X = first_30.reshape((num_features, num_movies)).transpose()
+	# Get the rest of the 18 the numbers, after the first 30
+	last_18 = X_and_theta[num_movies * num_features:]
+	# Reshape this column vector into a 6 X 3 matrix
+	theta = last_18.reshape(num_features, num_users ).transpose()
+	return X, theta
+
+
+
+# In[35]:
+
+def calculate_cost(X_and_theta, ratings, did_rate, num_users, num_movies, num_features, reg_param):
+	X, theta = unroll_params(X_and_theta, num_users, num_movies, num_features)
+	
+	# we multiply (element-wise) by did_rate because we only want to consider observations for which a rating was given
+	cost = sum( (X.dot( theta.T ) * did_rate - ratings) ** 2 ) / 2
+	# '**' means an element-wise power
+	regularization = (reg_param / 2) * (sum( theta**2 ) + sum(X**2))
+	return cost + regularization
+
+
+# In[25]:
+
+print initial_X_and_Theta
+
+
+# In[54]:
+
+from scipy import optimize
+
+reg_param=50
+
+minimizedcost_and_optimal_params=optimize.fmin_cg(calculate_cost,fprime=calculate_gradient,x0=initial_X_and_Theta,
+                                                 args=(ratings,didrate,num_users,num_movies,num_features,reg_param),
+                                                 maxiter=100,disp=True,full_output=True
+                                                 )
+
+
+# In[59]:
+
+cost,optimal_movie_features_and_user_prefs=minimizedcost_and_optimal_params[1], minimizedcost_and_optimal_params[0]
+
+
+# In[61]:
+
+movie_features,user_prefs=unroll_params(optimal_movie_features_and_user_prefs,num_users,num_movies,num_features)
+
+
+# In[62]:
+
+print movie_features
+
+
+# In[63]:
+
+print user_prefs
+
+
+# In[64]:
+
+all_predictions=movie_features.dot(user_prefs.T)
+
+
+# In[65]:
+
+print all_predictions
+
+
+# In[69]:
+
+predictions_for_rajeev=all_predictions[ :,0:1 ] + ratings_mean_eachmovie
+print predictions_for_rajeev
+
+
 
 
 
