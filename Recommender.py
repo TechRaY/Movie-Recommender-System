@@ -102,19 +102,4 @@ def normalize_ratings(ratings, did_rate):
 ratings,ratings_mean=normalize_ratings(ratings,didrate)
 
 
-# In[24]:
-
-print ratings_mean[i]           #rating mean of a particular row
-
-
-# In[25]:
-
-print ratings_mean              #rating mean of a particular row
-
-
-# In[26]:
-
-print ratings                   #ratings (data) is now normalized
-
-
 
